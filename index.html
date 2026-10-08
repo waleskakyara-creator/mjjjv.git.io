@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Coelhinho Runner 🐰</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #ffd6e7;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .jogo {
+      width: 900px;
+      max-width: 95%;
+      text-align: center;
+    }
+
+    h1 {
+      color: #d94f87;
+      margin-bottom: 10px;
+    }
+
+    #pontuacao {
+      color: #9b3c68;
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .campo {
+      position: relative;
+      width: 100%;
+      height: 300px;
+      overflow: hidden;
+      background: linear-gradient(#ffd8e8, #fff0f6);
+      border: 4px solid #e88ab0;
+      border-radius: 20px;
+    }
+
+    .chao {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: 35px;
+      background: #eaa0bd;
+      border-top: 4px solid #c86b94;
+    }
+
+    #coelho {
+      position: absolute;
+      left: 80px;
+      bottom: 35px;
+      width: 60px;
+      height: 70px;
+      font-size: 55px;
+      z-index: 2;
+    }
+
+    .pulo {
+      animation: pular 0.55s ease-out;
+    }
+
+    @keyframes pular {
+      0% {
+        bottom: 35px;
+      }
+
+      50% {
+        bottom: 170px;
+      }
+
+      100% {
+        bottom: 35px;
+      }
+    }
+
+    .obstaculo {
+      position: absolute;
+      bottom: 35px;
+      right: -60px;
+      width: 45px;
+      height: 55px;
+      font-size: 45px;
+      animation: andar 1.8s linear;
+    }
+
+    @keyframes andar {
+      from {
+        right: -60px;
+      }
+
+      to {
+        right: 100%;
+      }
+    }
+
+    #mensagem {
+      color: #9b3c68;
+      font-size: 22px;
+      font-weight: bold;
+      margin-top: 15px;
+    }
+
+    button {
+      margin-top: 10px;
+      padding: 12px 25px;
+      border: none;
+      border-radius: 20px;
+      background: #e66f9d;
+      color: white;
+      font-size: 17px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #d85889;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="jogo">
+
+    <h1>🐰 Coelhinho Runner 🌸</h1>
+
+    <div id="pontuacao">
+      Pontuação: 0
+    </div>
+
+    <div class="campo" id="campo">
+
+      <div id="coelho">🐰</div>
+
+      <div class="chao"></div>
+
+    </div>
+
+    <div id="mensagem">
+      Aperte ESPAÇO ou toque na tela para pular!
+    </div>
+
+    <button onclick="reiniciar()">
+      🔄 Reiniciar
+    </button>
+
+  </div>
+
+  <script>
+    const coelho = document.getElementById("coelho");
+    const campo = document.getElementById("campo");
+    const pontuacao = document.getElementById("pontuacao");
+    const mensagem = document.getElementById("mensagem");
+
+    let pontos = 0;
+    let jogando = true;
+    let intervalo;
+
+    function pular() {
+      if (!jogando) return;
+
+      if (!coelho.classList.contains("pulo")) {
+        coelho.classList.add("pulo");
+
+        setTimeout(() => {
+          coelho.classList.remove("pulo");
+        }, 550);
+      }
+    }
+
+    document.addEventListener("keydown", function(event) {
+      if (event.code === "Space" || event.code === "ArrowUp") {
+        event.preventDefault();
+        pular();
+      }
+    });
+
+    campo.addEventListener("click", pular);
+    campo.addEventListener("touchstart", pular);
+
+    function criarObstaculo() {
+      if (!jogando) return;
+
+      const obstaculo = document.createElement("div");
+
+      obstaculo.classList.add("obstaculo");
+      obstaculo.innerHTML = "🌷";
+
+      campo.appendChild(obstaculo);
+
+      const verificar = setInterval(() => {
+
+        const coelhoRect = coelho.getBoundingClientRect();
+        const obstaculoRect = obstaculo.getBoundingClientRect();
+
+        if (
+          coelhoRect.left < obstaculoRect.right &&
+          coelhoRect.right > obstaculoRect.left &&
+          coelhoRect.top < obstaculoRect.bottom &&
+          coelhoRect.bottom > obstaculoRect.top
+        ) {
+          fimDeJogo();
+          clearInterval(verificar);
+        }
+
+      }, 20);
+
+      setTimeout(() => {
+        if (obstaculo.parentNode) {
+          obstaculo.remove();
+          pontos++;
+          pontuacao.innerHTML = "Pontuação: " + pontos;
+        }
+
+        clearInterval(verificar);
+      }, 1800);
+    }
+
+    function fimDeJogo() {
+      jogando = false;
+
+      mensagem.innerHTML =
+        "💗 Game Over! Pontuação: " + pontos;
+    }
+
+    function reiniciar() {
+      document.querySelectorAll(".obstaculo").forEach(obstaculo => {
+        obstaculo.remove();
+      });
+
+      pontos = 0;
+      jogando = true;
+
+      pontuacao.innerHTML = "Pontuação: 0";
+
+      mensagem.innerHTML =
+        "Aperte ESPAÇO ou toque na tela para pular!";
+    }
+
+    intervalo = setInterval(() => {
+      criarObstaculo();
+    }, 2200);
+  </script>
+
+</body>
+</html>
